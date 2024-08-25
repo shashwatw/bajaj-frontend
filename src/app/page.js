@@ -1,16 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import {
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
-  Chip,
-  FormHelperText,
-  Button,
-  Typography,
-} from "@mui/material";
 
 function App() {
   const [apiInput, setApiInput] = useState(
@@ -51,8 +40,13 @@ function App() {
     }
   };
 
-  const handleFilterChange = (event) => {
-    setSelectedFilters(event.target.value);
+  const handleFilterChange = (e) => {
+    const options = e.target.options;
+    const values = Array.from(options)
+      .filter((option) => option.selected)
+      .map((option) => option.value);
+
+    setSelectedFilters(values);
   };
 
   // Function to filter the data based on selected options
@@ -61,110 +55,58 @@ function App() {
 
     if (selectedFilters.length === 0) return "No filters selected.";
 
-    let result = {
-      numbers: [],
-      alphabets: [],
-      highest_lowercase: [],
-    };
+    let result = [];
 
     if (selectedFilters.includes("numbers") && numbers) {
-      result.numbers = numbers;
+      result = [...result, ...numbers];
     }
     if (selectedFilters.includes("alphabets") && alphabets) {
-      result.alphabets = alphabets;
+      result = [...result, ...alphabets];
     }
     if (
       selectedFilters.includes("highest_lowercase") &&
       highest_lowercase_alphabet
     ) {
-      result.highest_lowercase = highest_lowercase_alphabet;
+      result = [...result, ...highest_lowercase_alphabet];
     }
 
-    return result;
-  };
-
-  const renderFilteredData = () => {
-    const data = getFilteredData();
-
-    return (
-      <div>
-        {data?.numbers?.length > 0 && (
-          <div>
-            <Typography variant="h6">Numbers</Typography>
-            <Typography>{data.numbers.join(", ")}</Typography>
-          </div>
-        )}
-        {data?.alphabets?.length > 0 && (
-          <div>
-            <Typography variant="h6">Alphabets</Typography>
-            <Typography>{data.alphabets.join(", ")}</Typography>
-          </div>
-        )}
-        {data?.highest_lowercase?.length > 0 && (
-          <div>
-            <Typography variant="h6">Highest Lowercase Alphabet</Typography>
-            <Typography>{data.highest_lowercase.join(", ")}</Typography>
-          </div>
-        )}
-        {data?.numbers?.length === 0 &&
-          data?.alphabets?.length === 0 &&
-          data?.highest_lowercase?.length === 0 && (
-            <Typography>No data to display.</Typography>
-          )}
-      </div>
-    );
+    return result.length > 0 ? result.join(", ") : "No data to display.";
   };
 
   return (
-    <div className="container" style={{ padding: "20px" }}>
-      <div className="input-section" style={{ marginBottom: "20px" }}>
-        <Typography variant="h6">API Input</Typography>
+    <div className="container">
+      <div className="input-section">
+        <label htmlFor="api-input">API Input</label>
         <input
           type="text"
+          id="api-input"
           value={apiInput}
           onChange={(e) => setApiInput(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
         />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          fullWidth
-        >
+        <button onClick={handleSubmit} className="w-full">
           Submit
-        </Button>
-        {error && <Typography color="error">{error}</Typography>}
+        </button>
+        {error && <p className="error">{error}</p>}
       </div>
 
-      <div className="filter-section" style={{ marginBottom: "20px" }}>
-        <FormControl fullWidth>
-          <InputLabel>Multi Filter</InputLabel>
-          <Select
-            multiple
-            value={selectedFilters}
-            onChange={handleFilterChange}
-            input={<OutlinedInput label="Multi Filter" />}
-            renderValue={(selected) => (
-              <div style={{ display: "flex", flexWrap: "wrap" }}>
-                {selected.map((value) => (
-                  <Chip key={value} label={value} style={{ margin: 2 }} />
-                ))}
-              </div>
-            )}
-          >
-            <MenuItem value="numbers">Numbers</MenuItem>
-            <MenuItem value="alphabets">Alphabets</MenuItem>
-            <MenuItem value="highest_lowercase">
-              Highest Lowercase Alphabet
-            </MenuItem>
-          </Select>
-          <FormHelperText>Select filters</FormHelperText>
-        </FormControl>
+      <div className="filter-section">
+        <label htmlFor="filter">Multi Filter</label>
+        <select
+          id="filter"
+          multiple
+          value={selectedFilters}
+          onChange={handleFilterChange}
+          style={{ height: "100px", width: "200px" }}
+        >
+          <option value="numbers">Numbers</option>
+          <option value="alphabets">Alphabets</option>
+          <option value="highest_lowercase">Highest Lowercase Alphabet</option>
+        </select>
       </div>
 
       <div className="response-section">
-        <Typography variant="h6">Filtered Response</Typography>
-        {renderFilteredData()}
+        <h3>Filtered Response</h3>
+        <p>{getFilteredData()}</p>
       </div>
     </div>
   );
